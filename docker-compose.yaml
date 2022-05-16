@@ -1,0 +1,9 @@
+version: "3.7"
+services:
+   web:
+      build:
+         context: .
+      hostname: imgx
+      ports:
+         - 8085:80
+
