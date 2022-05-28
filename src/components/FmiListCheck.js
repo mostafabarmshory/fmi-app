@@ -203,7 +203,7 @@ class FmiListCheck extends Component {
 				progress: Math.round((this.items.length - value.unkown) * 100 / this.items.length)
 			});
 			// recheck off items
-			if(ritem.state !== 'OFF' && ritem.counter < 2){
+			if(ritem.state === 'OFF' && ritem.counter < 2){
 				return setTimeout(() => this.recheckItem(ritem), 5000);
 			}
 		});
