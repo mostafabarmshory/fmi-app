@@ -14,6 +14,27 @@ import PromisePool from 'es6-promise-pool';
 let song = new Audio(moneyJackpot);
 
 
+function calcChecksum(imei) {
+	var sum = 0, multipliedDigit;
+
+	for (var i = 0; i < 14; i++) {
+		multipliedDigit = parseInt(imei.charAt(i), 10);
+		if ((i % 2) === 1) {
+			multipliedDigit = multipliedDigit * 2;
+		}
+		sum += (multipliedDigit >= 10 ? ((multipliedDigit % 10) + 1) : multipliedDigit);
+	}
+
+	var check1, check2;
+	check1 = 10 - parseInt(sum.toString().charAt((sum.toString().length - 1)));
+	check2 = (sum * 9) % 10;
+	if (check1 === 10) {
+		check1 = 0;
+	}
+	return check1 === check2 && check1 === parseInt(imei.charAt(14), 10);
+}
+
+
 function fetchFMI(imei) {
 	try {
 		return fetch('/api/v1/fmicheck?imei=' + imei, {
@@ -65,7 +86,8 @@ class FmiListCheck extends Component {
 				index: index,
 				state: 'wait',
 				imei: imeis[index],
-				hidden: false
+				hidden: false,
+				counter: 0
 			});
 		}
 		this.setState({
@@ -150,12 +172,23 @@ class FmiListCheck extends Component {
 	}
 
 	recheckItem(item) {
-		if (['clean', 'off', 'lost'].includes((item.state||"").toLowerCase())) {
+		if (['clean', 'lost', 'invalid'].includes((item.state || "").toLowerCase())) {
 			return Promise.resolve();
 		}
 		// Set Item working
 		var ritem = this.items[item.index];
+		if(!calcChecksum(ritem.imei)){
+			ritem.state = 'invalid';
+			var value = this.makeStatistics();
+			this.setState({
+				items: this.items,
+				statistics: value,
+				progress: Math.round((this.items.length - value.unkown) * 100 / this.items.length)
+			});
+			return Promise.resolve();
+		}
 		ritem.state = 'working';
+		ritem.counter ++;
 		this.setState({
 			items: this.items
 		});
@@ -169,6 +202,10 @@ class FmiListCheck extends Component {
 				statistics: value,
 				progress: Math.round((this.items.length - value.unkown) * 100 / this.items.length)
 			});
+			// recheck off items
+			if(ritem.state !== 'OFF' && ritem.counter < 2){
+				return setTimeout(() => this.recheckItem(ritem), 5000);
+			}
 		});
 	}
 
@@ -190,6 +227,7 @@ class FmiListCheck extends Component {
 			off: 0,
 			lost: 0,
 			clean: 0,
+			invalid: 0,
 			unkown: 0
 		};
 		this.items.forEach((item) => {
@@ -202,6 +240,9 @@ class FmiListCheck extends Component {
 					break;
 				case 'CLEAN':
 					value.clean++;
+					break;
+				case 'invalid':
+					value.invalid++;
 					break;
 				default:
 					value.unkown++;

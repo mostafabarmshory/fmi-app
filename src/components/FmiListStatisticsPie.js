@@ -24,25 +24,28 @@ export default class FmiListStatisticsPie extends Component {
 	 */
 	render() {
 		var data = {
-			labels: ['LOST', 'CLEAN', 'OFF', 'UNKNOWN'],
+			labels: ['LOST', 'CLEAN', 'OFF', 'INVALID', 'UNKNOWN'],
 			datasets: [
 				{
 					data: [
 						this.props.data.lost,
 						this.props.data.clean,
 						this.props.data.off,
+						this.props.data.invalid,
 						this.props.data.unkown
 					],
 					backgroundColor: [
 						'rgba(255, 0, 0, 0.2)',
 						'rgba(0, 255, 0, 0.2)',
 						'rgba(255, 206, 86, 0.2)',
+						'rgba(255, 256, 0, 0.2)',
 						'rgba(255, 255, 255, 0.2)',
 					],
 					borderColor: [
 						'rgba(255, 0, 0, 1)',
 						'rgba(0, 255, 0, 1)',
 						'rgba(255, 206, 86, 1)',
+						'rgba(255, 256, 0, 1)',
 						'rgba(255, 255, 255, 1)',
 					],
 					borderWidth: 1,
@@ -72,6 +75,10 @@ export default class FmiListStatisticsPie extends Component {
 								<td>: {this.props.data.off}</td>
 							</tr>
 							<tr>
+								<td>INVALID</td>
+								<td>: {this.props.data.invalid}</td>
+							</tr>
+							<tr>
 								<td>UNKNOWN</td>
 								<td>: {this.props.data.unkown}</td>
 							</tr>
@@ -81,6 +88,7 @@ export default class FmiListStatisticsPie extends Component {
 								<td>: {this.props.data.lost +
 									this.props.data.clean +
 									this.props.data.off +
+									this.props.data.invalid +
 									this.props.data.unkown}</td>
 							</tr>
 						</table>

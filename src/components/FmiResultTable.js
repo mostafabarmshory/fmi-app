@@ -14,6 +14,8 @@ function toColor(str) {
 			return 'green';
 		case 'OFF':
 			return 'orange';
+		case 'invalid':
+			return 'yellow';
 		default:
 			return '#FFFFFF';
 	}
@@ -97,7 +99,7 @@ export default class FmiResultTable extends Component {
 											color: toColor(item.state)
 										}}
 										class={`${item.state !== 'working' ? '': 'd-none'}`}
-										scope="row">{item.state}</th>
+										scope="row">{item.state}{item.counter > 1 ? '('+item.counter+')': '' }</th>
 									<th>
 										<Button 
 											disabled={['clean', 'off', 'lost', 'working', 'wait'].includes((item.state||"").toLowerCase())}
